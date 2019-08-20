@@ -6,7 +6,7 @@ Please give credit where it's due if using my tool.
 
 
 ## Before using:
-Install [Python](https://www.python.org/downloads/) (project is built with [3.7.3](https://www.python.org/downloads/release/python-373/))</br>
+Install [Python](https://www.python.org/downloads/) (project is built using [3.7.3](https://www.python.org/downloads/release/python-373/))</br>
 
 
 ## Usage
@@ -25,17 +25,21 @@ python main.py --input=INPUT_JSON_FILE --output=translated.bin
 
 #### Input Json File Syntax:
 ```json
-[
-  {
-    "offset": "0x00FFFFFF",
-    "text": "TEXT",
-    "original": "SOME ORIGINAL TEXT"
-  },
-  {
-    "offset": "0x00FFFFFF",
-    "text": "TEXT"
-  }
-]
+{
+    "address_offset": "0x00000000",
+    "addresses": [
+          {
+            "offset": "0x00FFFFFF",
+            "text": "TEXT 1",
+            "original": "SOME ORIGINAL TEXT 1"
+          },
+          {
+            "offset": "0x00FFFFFF",
+            "text": "TEXT 2",
+            "original": "SOME ORIGINAL TEXT 2"
+          }
+     ]
+}
 ```
 
 #### How to find address offsets:
