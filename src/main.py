@@ -5,6 +5,7 @@ import os
 import json
 import struct
 
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--input', dest='input', required=True, nargs=1, type=str, help='Input json file')
@@ -19,19 +20,36 @@ def main():
         return
 
     read_input_json = open(_input, 'r+t', encoding='utf8')
-    blocks = json.load(read_input_json, encoding='utf8')
+    read_json_data = json.load(read_input_json, encoding='utf8')
     read_input_json.close()
 
+    # Remove output if it exists
     if os.path.isfile(output):
         os.remove(output)
         pass
 
+    json_address_offset = read_json_data['address_offset']
+    json_addresses = read_json_data['addresses']
+
     output_file = open(output, 'xb')
 
     output_file.write('TRANSLATE'.encode('utf8'))  # Header
-    output_file.write(struct.pack('<L', len(blocks)))  # Amount of entries
-    for i in range(len(blocks)):
-        block: dict = blocks[i]
+
+    address_offset = 0x00000000
+    if len(json_address_offset) > 0:
+        if json_address_offset[2:].lower() == '0x':
+            unpacked_address = json_address_offset[2:]
+            pass
+        else:
+            unpacked_address = json_address_offset
+            pass
+        address_offset = int(unpacked_address, 16)
+        pass
+
+    output_file.write(struct.pack('<I', address_offset))  # Address offset
+    output_file.write(struct.pack('<L', len(json_addresses)))  # Amount of entries
+    for i in range(len(json_addresses)):
+        block: dict = json_addresses[i]
 
         offset: str = block['offset']
         text: str = block['text']
@@ -41,13 +59,15 @@ def main():
             continue
 
         if 'original' in block:
-            orig = ' Original: \"{0}\"'.format(block['original'])
+            orig = 'Original: \"{0}\"\n'.format(block['original'])
             pass
         else:
-            orig = ''
+            orig = '\n'
             pass
 
-        print('Found block\nOffset: {0}, Text: \"{1}\"{2}\n'.format(offset, text, orig))
+        print('Offset: {0}'.format(offset))
+        print('Text: \"{0}\"'.format(text))
+        print(orig)
 
         output_file.write(struct.pack('<I', i))  # Write index
 
@@ -61,7 +81,7 @@ def main():
         unpacked_address = int(unpacked_address, 16)
 
         if unpacked_address < 0:
-            print('Invalid offset! Skipping block...')
+            print('Invalid offset! Skipping...\n')
             continue
 
         text_data = text.encode('utf-8')
